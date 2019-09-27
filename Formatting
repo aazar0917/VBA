@@ -1,0 +1,350 @@
+
+'GPD Formatting for SAP Table PegTass to calculate total pegs in a given record.
+Public Function PegQty(v_asqty, v_xsqty, v_scpqty, v_lqty As Double)
+
+Dim v_pegqty As Double
+
+v_pegqty = v_asqty + v_xsqty + v_scpqty + v_lqty
+
+PegQty = v_pegqty
+
+End Function
+
+'GPD Formatting for SAP Table PegTass to calculate total pegs that can move in an  inventory tsf (usable inventory).
+Public Function TsfQty(v_asqty, v_xsqty As Double)
+
+Dim v_pegqty As Double
+
+v_pegqty = v_asqty + v_xsqty
+
+TsfQty = v_pegqty
+
+End Function
+
+'Parses out first piece of SAP Replenishment Object
+Public Function Repobj2Fst(v_repobj As String)
+Dim v_first As String
+Select Case Left(v_repobj, 2)
+    Case Is = "BE"
+        v_first = Trim(Mid(v_repobj, 3, 10))
+    Case Is = "OR"
+        v_first = RemoveLZero(Mid(v_repobj, 3, 12))
+    Case Is = "SG"
+        v_first = Mid(v_repobj, 3, 10)
+    Case Is = "PA"
+        v_first = RemoveLZero(Mid(v_repobj, 3, 10))
+    Case Is = "BA"
+        v_first = RemoveLZero(Mid(v_repobj, 3, 10))
+    Case Else
+        v_first = Mid(v_repobj, 3, 10)
+End Select
+
+
+Repobj2Fst = v_first
+
+End Function
+
+'Parses out the second segment of SAP Replenishment Object
+Public Function Repobj2nd(v_repobj As String)
+
+Dim v_scnd As String
+
+
+Select Case Left(v_repobj, 2)
+    Case Is = "BE"
+        v_scnd = Trim(RemoveLZero(Mid(v_repobj, 14, 5)))
+    Case Is = "OR"
+        v_scnd = ""
+    Case Is = "SG"
+        v_scnd = Mid(v_repobj, 17, 4)
+    Case Is = "M2"
+        v_scnd = Mid(v_repobj, 17, 4)
+    Case Is = "PA"
+        v_scnd = ""
+    Case Is = "BA"
+        v_scnd = RemoveLZero(Mid(v_repobj, 14, 5))
+    Case Else
+        v_scnd = ""
+End Select
+
+
+Repobj2nd = v_scnd
+
+End Function
+'Removes Leading Zeros
+Public Function RemoveLZero(v_repobj1 As String)
+Dim v_lzero As String
+Dim x As String
+
+v_lzero = Left(v_repobj1, 1)
+
+Do Until v_lzero <> "0"
+v_repobj1 = Replace(v_repobj1, 0, "", 1, 1)
+v_lzero = Left(v_repobj1, 1)
+Loop
+
+RemoveLZero = v_repobj1
+
+End Function
+
+'Converts Purchase Order and Line Item into PO Replenishment Object
+Public Function PO2Repobj(v_ebeln As String, v_ebelp As String)
+Dim repobj As String
+Dim prefix As String * 2
+Dim v_ebeln1 As String * 10
+Dim suffix As String * 4
+
+prefix = "BE"
+
+If Len(v_ebeln) = 9 Then
+v_ebeln1 = "0" & v_ebeln
+Else
+v_ebeln1 = v_ebeln
+End If
+
+Select Case Len(v_ebelp)
+    Case Is = 1
+        v_ebelp = "0000" & v_ebelp
+    Case Is = 2
+        v_ebelp = "000" & v_ebelp
+    Case Is = 3
+        v_ebelp = "00" & v_ebelp
+    Case Is = 4
+        v_ebelp = "0" & v_ebelp
+    Case Is = 5
+        v_ebelp = v_ebelp
+    Case Else
+        v_ebelp = ""
+End Select
+suffix = "0001"
+
+PO2Repobj = prefix & v_ebeln1 & "0" & v_ebelp & suffix
+
+End Function
+
+'Converts production order to replenishment object
+Public Function OR2Repobj(v_aufnr As String)
+Dim repobj As String
+Dim prefix As String * 2
+Dim v_aufnr1 As String * 12
+
+prefix = "OR"
+v_aufnr1 = v_aufnr
+
+Select Case Len(v_aufnr) And (Left(v_aufnr, 1) = "1" Or Left(v_aufnr, 1) = "2" Or Left(v_aufnr, 1) = "4" Or Left(v_aufnr, 1) = "5" Or Left(v_aufnr, 1) = "6" Or Left(v_aufnr, 1) = "7")
+    Case Is = 7
+        v_aufnr1 = "00000" & v_aufnr
+    Case Is = 8
+        v_aufnr1 = "0000" & v_aufnr
+    Case Is = 9
+        v_aufnr1 = "000" & v_aufnr
+    Case Is = 10
+        v_aufnr1 = "00" & v_aufnr
+    Case Is = 11
+        v_aufnr1 = "0" & v_aufnr
+    Case Is = 12
+        v_aufnr1 = v_aufnr
+    Case Else
+        v_aufnr1 = v_aufnr
+End Select
+
+OR2Repobj = prefix & v_aufnr1
+
+End Function
+
+'Converts planned order to GPD Replenishment Object
+Public Function PA2Repobj(v_plnum As String)
+Dim repobj As String
+Dim prefix As String * 2
+Dim v_plnum1 As String
+
+prefix = "PA"
+v_plnum1 = v_plnum
+
+Select Case Len(v_plnum)
+    Case Is = 1
+        v_plnum1 = "000000000" & v_plnum
+    Case Is = 2
+        v_plnum1 = "00000000" & v_plnum
+    Case Is = 3
+        v_plnum1 = "0000000" & v_plnum
+    Case Is = 4
+        v_plnum1 = "000000" & v_plnum
+    Case Is = 5
+        v_plnum1 = "00000" & v_plnum
+    Case Is = 6
+        v_plnum1 = "0000" & v_plnum
+    Case Is = 7
+        v_plnum1 = "000" & v_plnum
+    Case Is = 8
+        v_plnum1 = "00" & v_plnum
+    Case Is = 9
+        v_plnum1 = "0" & v_plnum
+    Case Is = 10
+        v_plnum1 = v_plnum
+    Case Else
+        v_plnum1 = v_plnum
+End Select
+
+PA2Repobj = prefix & v_plnum1
+
+End Function
+
+'converts Purchcase Requisition to GPD Replenishment Object
+Public Function PR2Repobj(v_BANFN As String, v_BNFPO As String)
+Dim repobj As String
+Dim prefix As String * 2
+Dim v_BANFN1 As String
+Dim suffix As String * 4
+
+prefix = "BA"
+
+If Len(v_BANFN) = 8 Then
+v_BANFN1 = "00" & v_BANFN
+Else
+v_BANFN1 = v_BANFN
+End If
+
+Select Case Len(v_BNFPO)
+    Case Is = 1
+        v_BNFPO = "0000" & v_BNFPO
+    Case Is = 2
+        v_BNFPO = "000" & v_BNFPO
+    Case Is = 3
+        v_BNFPO = "00" & v_BNFPO
+    Case Is = 4
+        v_BNFPO = "0" & v_BNFPO
+    Case Is = 5
+        v_BNFPO = v_BNFPO
+    Case Else
+        v_BNFPO = ""
+End Select
+suffix = "0000"
+
+PR2Repobj = prefix & v_BANFN1 & "0" & v_BNFPO & suffix
+
+End Function
+
+'Get the item category of a purchase order.  (Very slow on larger sets of data, don't recommend.)
+Public Function GetPOItCat(v_ebeln, v_ebelp As String)
+
+Dim db As DAO.Database
+Dim rs As DAO.Recordset
+Dim strSQL As String
+
+strSQL = "SELECT [EKPO_TXT].EBELN, [EKPO_TXT].EBELP, [EKPO_TXT].KNTTP " & vbCrLf & _
+         "FROM [EKPO_TXT] " & vbCrLf & _
+         "WHERE ((([EKPO_TXT].EBELN)='" & v_ebeln & "') AND (([EKPO_TXT].EBELP)='" & v_ebelp & "')); " & vbCrLf
+
+If Len(v_ebeln) > 0 Then
+Set db = CurrentDb
+Set rs = db.OpenRecordset(strSQL, dbOpenDynaset)
+rs.MoveFirst
+GetPOItCat = rs!KNTTP
+rs.Close
+Else
+GetPOItCat = Null
+End If
+End Function
+
+'Creates stock gain replenishment from material number item and year
+Public Function SGRepObj(v_mblnr As String, v_zeile As String, v_mjahr As String)
+
+SGRepObj = "SG" & v_mblnr & v_zeile & v_mjahr
+
+End Function
+'Combines PO Number and Item for simplified reporting
+Public Function CombinePO(v_ebeln As String, v_ebelp As String)
+
+CombinePO = v_ebeln & "-" & v_ebelp
+
+End Function
+
+'Combines PR Number and Item for simplified reporting
+Public Function CombinePR(v_BANFN As String, v_BNFPO As String)
+
+CombinePR = v_BANFN & "-" & v_BNFPO
+
+End Function
+
+'incrementing autonumber utility
+Function AutoNumber(i) As Long
+   If lastcall = Null Then
+         seqNumber = 0
+    End If
+    'lastcall = lastcall + 1
+    seqNumber = seqNumber + 1
+    AutoNumber = seqNumber
+End Function
+
+'Adding Leading zeros to a PO Item
+Public Function AddLZero(v_ebelp As String)
+
+Select Case Len(v_ebelp)
+    Case Is = 1
+        v_ebelp = "0000" & v_ebelp
+    Case Is = 2
+        v_ebelp = "000" & v_ebelp
+    Case Is = 3
+        v_ebelp = "00" & v_ebelp
+    Case Is = 4
+        v_ebelp = "0" & v_ebelp
+    Case Is = 5
+        v_ebelp = v_ebelp
+    Case Else
+        v_ebelp = ""
+End Select
+
+AddLZero = v_ebelp
+
+End Function
+
+'Calculates ISO Week Number... Good for labor analysis/payroll stuff
+Public Function IsoWeekNum(d1 As Date) As Integer
+   Dim d2 As Long
+   Dim d3 As Long
+   d2 = DateSerial(Year(d1 - Weekday(d1 - 1) + 4), 1, 3)
+   d3 = (Int((d1 - d2 + Weekday(d2) + 5) / 7)) - 39
+   
+   If d3 >= 0 Then
+   IsoWeekNum = d3
+   Else
+   IsoWeekNum = (Int((d1 - d2 + Weekday(d2) + 5) / 7)) + 13
+
+   End If
+End Function
+
+
+'Get start date for a given week
+Function GetWeekStartDate(ByVal strDate, Optional ByVal lngStartDay As Long = 2) As String
+    GetWeekStartDate = DateAdd("d", _
+                       -Weekday(CDate(strDate), lngStartDay) + 1, CDate(strDate))
+End Function
+
+'Reformat PACE PO Replenishment Objects
+Public Function FixRepobj(v_repobj1 As String)
+Dim v_lzero As String
+Dim x As String
+
+'v_lzero = Left(v_repobj1, 1)
+v_lzero = InStr(1, v_repobj1, "/")
+
+Do Until v_lzero = "0"
+v_repobj1 = Replace(v_repobj1, "/", 0, 1, 1)
+v_lzero = InStr(1, v_repobj1, "/")
+Loop
+
+If Left(v_repobj1, 7) = "POitem " Then
+v_repobj1 = Replace(v_repobj1, "POitem ", "BE", 1, 1)
+ElseIf Left(v_repobj1, 7) = "Subcon " Then
+v_repobj1 = Replace(v_repobj1, "Subcon ", "BE", 1, 1)
+End If
+
+v_repobj1 = v_repobj1 & "0001"
+
+FixRepobj = v_repobj1
+
+End Function
+
+
+
