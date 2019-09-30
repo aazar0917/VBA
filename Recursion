@@ -1,0 +1,108 @@
+TABLE: BOM1
+Field: LVL str
+Field: PARENT str
+Field: Child str.
+
+Option Compare Database
+Option Explicit
+
+'Globals
+Dim rs1 As DAO.Recordset
+Dim x As Double
+Const MaxCount As Double = 20
+Dim selectedparent As String
+Dim v_level As Double
+
+
+Public Function ParentSel() 'This fucking works!!!
+Dim strSQLCrtTbl As String
+Dim EndItem As String
+
+DoCmd.SetWarnings False
+x = 0
+
+EndItem = "A"
+v_level = 0
+strSQLCrtTbl = "Select " & _
+            "'" & v_level & "' as Lvl, " & _
+            "'" & EndItem & "' as Parent, " & _
+            "'' as Child " & _
+            "INTO BOM1 ;"
+
+DoCmd.RunSQL strSQLCrtTbl
+
+v_level = 1
+
+Call Explode(EndItem, v_level)
+
+End Function
+
+Public Sub Explode(ByRef selectedparent As String, ByVal v_lvl As Double) 'This fucking works!!!
+Dim strSQL As String
+Dim strSQL1 As String
+Dim strSQLIns As String
+Dim strSQLCrtTbl As String
+Dim db As DAO.Database
+Dim rs As DAO.Recordset
+Dim rs2 As DAO.Recordset
+Dim v_parent As Variant
+
+DoCmd.SetWarnings False
+
+strSQL = "Select " & _
+            "Parent, " & _
+            "Child " & _
+            "From BOM " & _
+            "Where Parent ='" & selectedparent & "';"
+
+Set db = CurrentDb
+Set rs = db.OpenRecordset(strSQL, dbOpenDynaset)
+
+v_parent = rs!Parent
+
+Do While Not rs.EOF
+'Debug.Print "Going into Parent Loop "; rs!Parent, rs!Child, "v_level", v_level, vbCr
+    'Parent Loop
+    v_level = v_lvl
+
+        If x < MaxCount Then
+                strSQLIns = "INSERT INTO BOM1 ( [Lvl], Parent, Child ) " & vbCrLf & _
+                            "SELECT " & vbCrLf & _
+                            "'" & v_level & "' , " & vbCrLf & _
+                            "'" & rs!Parent & "', " & vbCrLf & _
+                            "'" & rs!Child & "' " & vbCrLf & _
+                            ";" & vbCrLf
+                'Insert into BOM1
+                DoCmd.RunSQL strSQLIns
+                                
+                                'Look for more children
+                                selectedparent = rs!Child
+                                
+                                       strSQL = "Select " & _
+                                                "Parent, " & _
+                                                "Child " & _
+                                                "From BOM " & _
+                                                "Where Parent ='" & selectedparent & "';"
+                                                
+                                Set rs2 = db.OpenRecordset(strSQL, dbOpenDynaset)
+
+                                If rs2.RecordCount > 0 Then
+                                
+                                'Debug.Print "Going into Child Loop "; rs!Parent, rs!Child, "v_level", v_level, vbCr
+      
+                                        
+                               'More children found.
+
+                                   Call Explode(rs!Child, v_level + 1)
+                                      
+                                Else:
+                                
+                                'Debug.Print "No Child Found       "; rs!Parent, rs!Child, "v_level", v_level, vbCr
+                                End If
+            End If
+
+rs.MoveNext
+
+Loop
+
+End Sub
