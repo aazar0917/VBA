@@ -1,0 +1,117 @@
+
+'Used in SAP Purchase Order Line Item Text
+Public Function GetClass(v_area As String)
+Dim v_result As String
+
+Select Case True
+
+    Case v_area Like "*SETUP*"
+        v_result = "SETUP"
+    Case v_area Like "*SET-UP*"
+        v_result = "SETUP"
+    Case v_area Like "*SET UP*"
+        v_result = "SETUP"
+    Case v_area Like "*TARIF*"
+        v_result = "TARIFF"
+    Case v_area Like "*TARRIF*"
+        v_result = "TARIFF"
+    Case v_area Like "*EXPED*"
+        v_result = "EXPEDITE"
+    Case v_area Like "*NRE*"
+        v_result = "NRE"
+    Case v_area Like "*TOOL*"
+        v_result = "TOOLING"
+    Case v_area Like "*PACK*"
+        v_result = "PACKAGING"
+    Case v_area Like "*REWORK*"
+        v_result = "REWORK"
+    Case v_area Like "*RE-WORK*"
+        v_result = "REWORK"
+    Case v_area Like "*FREIGHT*"
+        v_result = "FREIGHT"
+    Case v_area Like "*PROG*"
+        v_result = "PROGRAMMING"
+    Case v_area Like "*FAIR*"
+        v_result = "FIRST ARTICLE"
+    Case v_area Like "*FAI*"
+        v_result = "FIRST ARTICLE"
+    Case v_area Like "*F.A.I.R.*"
+        v_result = "FIRST ARTICLE"
+    Case v_area Like "*F A I R*"
+        v_result = "FIRST ARTICLE"
+    Case v_area Like "*FA *"
+        v_result = "FIRST ARTICLE"
+    Case v_area Like "*F/A*"
+        v_result = "FIRST ARTICLE"
+    Case v_area Like "*FIRST *"
+        v_result = "FIRST ARTICLE"
+    Case v_area Like "*TEST*"
+        v_result = "TESTING"
+    Case v_area Like "*STENC*"
+        v_result = "STENCIL"
+    Case v_area Like "*TRAV*"
+        v_result = "TRAVEL"
+     Case v_area Like "*OVERT*"
+        v_result = "OVERTIME"
+     Case v_area Like "*STOCK*"
+        v_result = "RESTOCK"
+     Case v_area Like "*SHIP*"
+        v_result = "SHIPPING"
+     Case v_area Like "*REV*TO*"
+        v_result = "REVISION"
+     Case v_area Like "*FIXT*"
+        v_result = "FIXTURE"
+     Case v_area Like "*CANC*"
+        v_result = "CANCELLATION"
+     Case v_area Like "*DOCU*"
+        v_result = "DOCUMENTATION"
+      Case v_area Like "*TRAIN*"
+        v_result = "TRAINING"
+      Case v_area Like "*SCRAP*"
+        v_result = "SCRAP"
+      Case v_area Like "*LABOR*"
+        v_result = "LABOR"
+        
+    Case Else
+        v_result = "NOT CLASSIFIED"
+
+End Select
+GetClass = v_result
+
+'Used to indentify division from WBSE
+Public Function GetArea(v_area As String)
+Dim v_result As String
+
+v_area = Left(v_area, 4)
+
+Select Case True
+
+    Case v_area Like "1*"
+        v_result = "CTS"
+    Case v_area Like "2*"
+        v_result = "CTS"
+    Case v_area Like "3*"
+        v_result = "CDA"
+    Case v_area Like "40-1*"
+        v_result = "CDA"
+    Case v_area Like "40-3*"
+        v_result = "CDA"
+    Case v_area Like "40-5*"
+        v_result = "CMS"
+    Case v_area Like "41-1*"
+        v_result = "CDA"
+    Case v_area = "41-G"
+        v_result = "CMS"
+    Case v_area = "41-S"
+        v_result = "CMS"
+    Case v_area Like "41-5*"
+        v_result = "CMS"
+    Case v_area = "TW"
+        v_result = "TW"
+    Case Else
+        v_result = "OTHER"
+
+End Select
+GetArea = v_result
+
+End Function
